@@ -3,12 +3,15 @@ import {create} from 'zustand';
 interface FontStoreData {
     fontList: string[];
     current: string;
+    metadataOpen: boolean;
 }
 
 interface FontStoreAction {
     add(blob: Blob): string;
     remove(id_or_url: string): void;
     setCurrent(current: string): void;
+    openMetadata(): void;
+    closeMetadata(): void;
 }
 
 type FontStore = FontStoreData & FontStoreAction;
@@ -16,6 +19,7 @@ type FontStore = FontStoreData & FontStoreAction;
 const useFontStore = create<FontStore>((set, factory) => ({
     fontList: [],
     current: '',
+    metadataOpen: false,
     add(blob) {
         const url = URL.createObjectURL(blob);
         set(({fontList}) => ({fontList: [...fontList, url]}));
@@ -30,6 +34,12 @@ const useFontStore = create<FontStore>((set, factory) => ({
     },
     setCurrent(current) {
         set({current});
+    },
+    openMetadata(){
+        set({metadataOpen: true});
+    },
+    closeMetadata(){
+        set({metadataOpen: false});
     }
 }));
 

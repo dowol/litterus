@@ -1,8 +1,6 @@
 import {create} from 'zustand';
 import type {CssFontSize, CssFontStyle, CssFontWeight} from './font-metadata';
 
-import defaultText from './defaultText.json' with {type: 'json'};
-
 interface FontSampleTextData {
     text: string;
     fontSize: CssFontSize;
@@ -19,7 +17,7 @@ interface FontSampleTextActions {
 }
 
 const useFontView = create<FontSampleTextData & FontSampleTextActions>(set => ({
-    text: defaultText.en,
+    text: '',
     fontSize: 32,
     fontStyle: 'normal',
     fontWeight: 400,
@@ -27,7 +25,7 @@ const useFontView = create<FontSampleTextData & FontSampleTextActions>(set => ({
 
     setText(text) {
         if(text) set({text});
-        else set({text: defaultText.en});
+        else set({text: ''});
     },
     setFontSize: (fontSize) => {
         set({fontSize});
