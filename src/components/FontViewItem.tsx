@@ -28,6 +28,10 @@ const FontViewBox = styled(Paper)`
         overflow-x: hidden;
         padding: 0 .25rem;
         user-select: none;
+        
+        &.empty-sample-text {
+            color: gray;
+        }
     }
 `;
 
@@ -65,8 +69,7 @@ const FontFaceName = styled('strong')`
     font-style: italic;
 `;
 
-const FontWeight = styled(Chip)`
-`;
+const FontWeight = styled(Chip)``;
 
 const FontIsItalic = styled(Chip)`
     font-style: italic;
@@ -78,21 +81,24 @@ interface FontViewProps {
 }
 
 export default function FontViewItem({src, family}: FontViewProps) {
-    if(!src) src='';
+    src ||= '';
 
-    const id = useMemo(() => blobs.getUUID(src)?.replaceAll('-', ''), []);
+    const id = useMemo(() => blobs.getUUID(src), [src]);
     const unloadFont = useFontStore(s => s.remove);
 
     const [metadata, setMetadata] = useState<FontMetadata | null>(null);
     const setCurrent = useFontStore(s => s.setCurrent);
+    const openMetadata = useFontStore(s => s.openMetadata);
 
     const onDelete = useCallback(() => {
         unloadFont(src);
+        sessionStorage.removeItem(src);
+        URL.revokeObjectURL(src);
     }, []);
 
     const onInfo = useCallback(() => {
-        const id = blobs.getUUID(src) ?? '';
-        setCurrent(id);
+        setCurrent(src);
+        openMetadata();
     }, []);
 
     useEffect(() => {
@@ -101,24 +107,21 @@ export default function FontViewItem({src, family}: FontViewProps) {
         getFontMetadata(src)
             .then(data => {
                 setMetadata(data);
-                const key = 'font-metadata:' + blobs.getUUID(src);
-                setCurrent(key);
-                sessionStorage.setItem(key, JSON.stringify(data));
-                fontFace = new FontFace(data.fontName, `url('${src}')`, {
-                    style: data.style.toString(),
-                    weight: data.weight.toString()
+                sessionStorage.setItem(src, JSON.stringify(data));
+                fontFace = new FontFace(data!.fontName, `url('${src}')`, {
+                    style: data!.style.toString(),
+                    weight: data!.weight.toString()
                 });
                 document.fonts.add(fontFace);
                 fontFace.load().catch(reason => console.error(reason));
             });
 
         return () => void (fontFace && document.fonts.delete(fontFace));
-
     }, []);
 
 
     return (
-        <FontViewBox
+        <FontViewBox 
             // @ts-ignore
             component={'li'}
             sx={{
@@ -134,7 +137,7 @@ export default function FontViewItem({src, family}: FontViewProps) {
                 <FontFaceInfo translate={'no'}>
                     <FontFaceName>{family || (metadata?.fontName ?? <Skeleton variant={'rectangular'}/>)}</FontFaceName>
                     {(metadata?.weight) &&
-                        <FontWeight label={`${metadata.weight} / ${fontWeightName[metadata.weight]}`} size={'small'}/>}
+                        <FontWeight label={`${metadata.weight} \xb7 ${fontWeightName[metadata.weight]}`} size={'small'}/>}
                     {metadata?.style === 'italic' && <FontIsItalic label={'italic'} size={'small'}/>}
                 </FontFaceInfo>
 
@@ -161,7 +164,7 @@ function SampleText() {
     const text = useFontView(s => s.text);
 
     return (
-        <p className={'sample-text'} translate={'no'}>{text}</p>
+        <p className={'sample-text' + (text ? '' : ' empty-sample-text')} translate={'no'}>{text || 'Sample text will be displayed here.'}</p>
     );
 }
 

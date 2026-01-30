@@ -17,20 +17,11 @@ const AppContent = styled('div')`
     
     display: flex;
     flex-flow: column nowrap;
-    align-items:stretch;
-    justify-content: flex-start;
-    
-    @media(min-width: 960px) {
-        flex-flow: row nowrap;
-        justify-content: space-between;
-        overflow: hidden;
-    }
-    
-    background-color: whitesmoke;
+    align-items: stretch;
+    justify-content: stretch;
 `;
 
 function App() {
-
     return (
         <LayoutRoot>
             <Header/>

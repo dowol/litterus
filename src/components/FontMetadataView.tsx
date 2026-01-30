@@ -1,118 +1,118 @@
 import {styled} from '@mui/system';
-import {Paper, Typography, List, ListItem, ListItemText, Skeleton, Tooltip, IconButton} from '@mui/material';
-import TranslateIcon from '@mui/icons-material/Translate';
-
+import {
+    Alert,
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    IconButton,
+    List,
+    ListItem,
+    ListItemText,
+    Skeleton,
+    Typography
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import {Activity, useEffect, useState} from 'react';
+import Linkify from 'linkify-react';
+
 import useFontStore from "../util/font-store.ts";
-import type {FontMetadata} from "../util/font-metadata.ts";
+import {type FontMetadata} from "../util/font-metadata.ts";
 
 import fontWeightName from '../util/fontWeightName.json' with {type: 'json'};
 
-const PropertiesView = styled(Paper)`
-    min-height: 80px;
-    border-radius: unset;
-
-    @media (min-width: 960px) {
-        width: 280px;
-        padding: .5rem 0;
-        position: sticky;
-        top: 0;
-        left: 0;
-        overflow-x: hidden;
-        overflow-y: auto;
-    }
-
-    > article {
-        margin: .5rem;
-    }
-
-    h2 {
-        text-align: center;
-    }
-    
-    .description {
-        text-align: center;
-    }
+const ModalHeader = styled(DialogTitle)`
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: space-between;
 `;
 
 const MetadataProperty = styled(ListItemText)`
     display: flex;
     flex-flow: column-reverse nowrap;
 
-
     .MuiListItemText-primary {
         border-left: .125rem solid lightgray;
         padding-left: .375rem;
     }
-
 
     .MuiListItemText-secondary {
         font-family: monospace;
     }
 `;
 
+const MetadataList = styled(List)`
+    background-color: whitesmoke;
+    overflow-y: auto;
+`;
+
+/** Not Available (N/A) Component */
 const NA = <Skeleton variant={'rectangular'}/>;
 
 export default function FontMetadataView() {
-
     const [metadata, setMetadata] = useState<FontMetadata | null>(null);
     const current = useFontStore(s => s.current);
+    const open = useFontStore(s => s.metadataOpen);
+    const onClose = useFontStore(s => s.closeMetadata);
 
     useEffect(() => {
-        setMetadata(JSON.parse(sessionStorage.getItem('font-metadata:' + current) || '""'));
+        setMetadata(JSON.parse(sessionStorage.getItem(current) || 'null'));
     }, [current]);
 
     return (
-        <PropertiesView
-            //@ts-ignore
-            component={'section'}
-            elevation={2} id={'font-metadata'}>
-            <article>
+        <Dialog {...{open, onClose}} >
+            <ModalHeader
+                //@ts-ignore
+                component={'div'}>
                 <Typography component={'h2'} variant={'h5'}>Font Metadata</Typography>
+                <IconButton onClick={onClose}>
+                    <CloseIcon/>
+                </IconButton>
+            </ModalHeader>
+            <DialogContent
+                //@ts-ignore
+                component={'section'}
+                elevation={2} id={'font-metadata'}>
+                <article>
+                    <Activity mode={metadata ? 'visible' : 'hidden'}>
 
-                <Activity mode={metadata ? 'visible' : 'hidden'}>
-
-                    <List>
-                        <ListItem>
-                            <MetadataProperty secondary={'Font Name'} primary={metadata?.fontName ?? NA}/>
-                        </ListItem>
-                        <ListItem>
-                            <MetadataProperty secondary={'Font Weight'}
-                                              primary={metadata ? `${metadata.weight} / ${fontWeightName[metadata.weight]}` : NA}/>
-                        </ListItem>
-                        <ListItem>
-                            <MetadataProperty secondary={'Font Style'}
-                                              primary={metadata ? (metadata.style.charAt(0).toUpperCase() + metadata.style.slice(1)) : NA}/>
-                        </ListItem>
-                        {
-                            metadata?.version &&
+                        <MetadataList>
                             <ListItem>
-                                <MetadataProperty secondary={'Version'} primary={metadata?.version ?? NA}/>
+                                <MetadataProperty secondary={'Font Name'} primary={metadata?.fontName ?? NA}/>
                             </ListItem>
-                        }
-                        {
-                            metadata?.designer &&
                             <ListItem>
-                                <MetadataProperty secondary={'Author'} primary={metadata.designer}/>
+                                <MetadataProperty secondary={'Font Weight'}
+                                                  primary={metadata ? `${metadata.weight} / ${fontWeightName[metadata.weight]}` : NA}/>
                             </ListItem>
-                        }
-                        {
-                            metadata?.copyright &&
                             <ListItem>
-                                <MetadataProperty secondary={'Copyright'} primary={metadata.copyright}/>
+                                <MetadataProperty secondary={'Font Style'}
+                                                  primary={metadata ? (metadata.style.charAt(0).toUpperCase() + metadata.style.slice(1)) : NA}/>
                             </ListItem>
-                        }
-
-                    </List>
-
-                </Activity>
-                <Activity mode={metadata ? 'hidden' : 'visible'}>
-                    <p className={'description'}>
-                        Click <strong>Font Info</strong> button(ⓘ) <br/>
-                        to retrieve font metadata.
-                    </p>
-                </Activity>
-            </article>
-        </PropertiesView>
+                            {
+                                metadata?.version &&
+                                <ListItem>
+                                    <MetadataProperty secondary={'Version'} primary={<Linkify>{metadata?.version ?? NA}</Linkify>}/>
+                                </ListItem>
+                            }
+                            {
+                                metadata?.designer &&
+                                <ListItem>
+                                    <MetadataProperty secondary={'Author'} primary={<Linkify>{metadata.designer}</Linkify>}/>
+                                </ListItem>
+                            }
+                            {
+                                metadata?.copyright &&
+                                <ListItem>
+                                    <MetadataProperty secondary={'Copyright'} primary={<Linkify>{metadata.copyright}</Linkify>}/>
+                                </ListItem>
+                            }
+                        </MetadataList>
+                    </Activity>
+                    <Activity mode={metadata ? 'hidden' : 'visible'}>
+                        <Alert severity="error">This is an error Alert.</Alert>
+                    </Activity>
+                </article>
+            </DialogContent>
+        </Dialog>
     );
 }

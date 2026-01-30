@@ -1,5 +1,5 @@
 import {styled} from "@mui/system";
-import {type ChangeEvent, type DragEvent, type MouseEvent, useCallback, useRef} from "react";
+import {type ChangeEvent, type DragEvent, type MouseEvent, useCallback, useRef, useState} from "react";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import useFontStore from "../util/font-store.ts";
 
@@ -24,15 +24,11 @@ const FileDropArea = styled('div')`
     }
 
     p.prompt {
-        text-transform: uppercase;
-        font-size: 1rem;
-
-        .nocaps {
-            text-transform: initial;
-        }
-
-        small {
-            text-transform: initial;
+        font-size: 1.125rem;
+        text-align: center;
+        
+        strong {
+            text-transform: uppercase;
         }
     }
 
@@ -41,7 +37,7 @@ const FileDropArea = styled('div')`
     }
 `;
 
-// List of allowed font subtypes
+/** List of allowed font subtypes */
 const allowedTypes = ['otf', 'ttf', 'woff', 'woff2'];
 
 export default function FileDialog() {
@@ -49,13 +45,38 @@ export default function FileDialog() {
 
     const addFont = useFontStore(s => s.add);
 
-
     const onClick = useCallback((e: MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
         if (e.isPropagationStopped()) {
             const input = fileInputRef.current!;
             input.click();
         }
+    }, []);
+
+    const onDragEnter = useCallback((e: DragEvent<unknown>) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+    }, []);
+
+    const onDragLeave = useCallback((e: DragEvent<unknown>) => {
+        e.preventDefault();
+        e.stopPropagation();
+    }, []);
+
+    const onDragOver = useCallback((e: DragEvent<unknown>) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+
+    }, []);
+
+    const onDrop = useCallback((e: DragEvent<unknown>) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        [...e.dataTransfer.files].forEach(addFont);
+
     }, []);
 
     const onChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
@@ -68,10 +89,12 @@ export default function FileDialog() {
 
 
     return (
-        <FileDropArea {...{onClick}} onDoubleClick={onClick}>
+        <FileDropArea {...{onClick, onDragEnter, onDragLeave, onDragOver, onDrop}} onDoubleClick={onClick}>
             <FileUploadIcon/>
             <p className={'prompt'}>
-                Click here to load your fonts <br/>
+                <strong>Click or Drop font files here</strong><br/>
+
+                to load your fonts <br/>
                 <small>
                     <strong>{allowedTypes.map(s => s.toUpperCase()).join(', ') + ' '}</strong>
                     types of file are supported.
