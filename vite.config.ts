@@ -1,11 +1,11 @@
 import { VitePWA } from 'vite-plugin-pwa';
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
-import {name} from './package.json' with {type: 'json'};
+import packageJson from './package.json' with {type: 'json'};
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    base: import.meta.env.PROD ? `/${name}/` : undefined,
+    base: `/${packageJson.name}/`,
     build: {
         sourcemap: false,
         rollupOptions: {
