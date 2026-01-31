@@ -7,19 +7,7 @@ import packageJson from './package.json' with {type: 'json'};
 export default defineConfig({
     base: `/${packageJson.name}/`,
     build: {
-        sourcemap: false,
-        rollupOptions: {
-            output: {
-                manualChunks: id => {
-                    if(id.includes('@mui'))
-                        return 'mui';
-                    else if(id.includes('node_modules'))
-                        return 'vendor';
-                    else
-                        return null;
-                }
-            }
-        }
+        sourcemap: false
     },
   plugins: [react(), VitePWA({
     strategies: 'injectManifest',
