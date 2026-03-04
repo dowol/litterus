@@ -63,7 +63,6 @@ export default function Header(){
 
     const onTextChange = useCallback((e: FormEvent<HTMLInputElement>) => {
         e.currentTarget.value = e.currentTarget.value.replaceAll(/\n+/g, ' ');
-        console.log(e.currentTarget.value);
         setText(e.currentTarget.value);
     }, []);
 
